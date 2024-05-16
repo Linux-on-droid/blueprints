@@ -18,7 +18,7 @@
 readonly BLUEPRINT_NAME="DEBIAN"
 
 readonly DEFAULT_RELEASE="trixie"
-readonly DEFAULT_ARCH="armhf"
+readonly DEFAULT_ARCH="arm64"
 
 # script to run inside the chroot
 readonly CHROOT_SCRIPT="chroot-configure.sh"
