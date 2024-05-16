@@ -46,11 +46,8 @@ EOF
 }
 
 mount_binfmts () {
-    if ! mount | grep -q 'binfmt_misc' ; then
-        echo "[*] Enabling binfmts for cross-bootstrapping..."
-        mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
-    fi
-    update-binfmts --enable
+    echo "[*] Enabling binfmts for cross-bootstrapping..."
+    mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
 }
 
 cleanup () {
