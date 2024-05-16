@@ -17,7 +17,7 @@
 
 readonly BLUEPRINT_NAME="DEBIAN"
 
-readonly DEFAULT_RELEASE="buster"
+readonly DEFAULT_RELEASE="trixie"
 readonly DEFAULT_ARCH="armhf"
 
 # script to run inside the chroot
