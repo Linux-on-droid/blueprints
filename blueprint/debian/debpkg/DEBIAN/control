@@ -8,8 +8,7 @@ Depends: libc6,
     lightdm,
     dbus-x11,
     xfce4, tango-icon-theme,
-    sudo, rsync, xinput,
-    maru-mflinger-client
+    sudo, rsync, xinput
 Recommends: xfce4-terminal, xfce4-screenshooter,
     lxtask,
     vim,

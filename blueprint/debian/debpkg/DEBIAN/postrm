@@ -21,8 +21,3 @@
 # Clean up any files created during install.
 #
 
-# retore original lightdm.conf
-mv /etc/lightdm/lightdm.conf.backup /etc/lightdm/lightdm.conf
-
-# restore original applications panel
-mv /etc/xdg/menus/xfce-applications.menu.backup /etc/xdg/menus/xfce-applications.menu

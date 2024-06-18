@@ -36,7 +36,7 @@
 set -e
 set -u
 
-USER="maru"
+USER="lindroid"
 
 # create default user account
 if ! id -u "$USER" ; then
@@ -63,6 +63,10 @@ adduser "$USER" sdcard_rw
 # read systemd logs via journalctl
 adduser "$USER" systemd-journal
 
+# allow to acess input devices
+adduser "$USER" input
+adduser "sddm" input
+
 # make sure root is added to Android's paranoid networking groups
 adduser root inet
 adduser root inet_raw
@@ -78,12 +82,6 @@ fi
 
 ## systemd ##
 
-# This is harmless as everything still works with this enabled,
-# but only Android should do network interface configuration.
-# systemd networking.service (ifup/ifdown) syncs with sysvinit
-# so disable it using update-rc.d
-/usr/sbin/update-rc.d networking disable
-
 ## udev ##
 
 # remove any persistent interface naming rules
@@ -94,54 +92,7 @@ if [ -f "$PERSISTENT_NET_RULES" ] ; then
     rm "$PERSISTENT_NET_RULES"
 fi
 
-### LightDM configuration ###
-
-if [ -e /etc/lightdm/lightdm.conf ] ; then
-    mv /etc/lightdm/lightdm.conf /etc/lightdm/lightdm.conf.backup
-
-    cat > /etc/lightdm/lightdm.conf <<EOF
-[SeatDefaults]
-autologin-user=$USER
-EOF
-fi
-
-### XFCE tweaks ###
-
-# make sure $USER owns everything
-chown -R "$USER":"$USER" /var/maru
-
-# sync home directory config and settings (trailing slash is important!)
-rsync -a /var/maru/ "/home/$USER"
-
-# remove Audio Mixer app
-if [ -e /usr/share/applications/xfce4-mixer.desktop ] ; then
-    echo "Hidden=true" >> /usr/share/applications/xfce4-mixer.desktop
-fi
-
-# remove Log Out app
-if [ -e /usr/share/applications/xfce4-session-logout.desktop ] ; then
-    echo "Hidden=true" >> /usr/share/applications/xfce4-session-logout.desktop
-fi
-
-# custom applications panel
-# note: we are forced to overrride the default menu because desktop
-# left-click applications menu cannot use a custom menu file
-if [ -e  /etc/xdg/menus/xfce-applications.menu ] ; then
-    mv /etc/xdg/menus/xfce-applications.menu /etc/xdg/menus/xfce-applications.menu.backup
-fi
-mv /etc/xdg/menus/maru-applications.menu /etc/xdg/menus/xfce-applications.menu
-
-### Firefox configuration ###
-
-if [ -e /etc/firefox-esr/firefox-esr.js ] ; then
-    cp /etc/firefox-esr/firefox-esr.js /etc/firefox-esr/firefox-esr.js.backup
-
-    cat >> /etc/firefox-esr/firefox-esr.js <<EOF
-
-// Force desktop versions of websites by hiding armv7l
-pref("general.useragent.override", "Mozilla/5.0 (X11; Linux; rv:45.0) Gecko/20100101 Firefox/45.0");
-EOF
-fi
+systemctl disable NetworkManager
 
 #DEBHELPER#
 

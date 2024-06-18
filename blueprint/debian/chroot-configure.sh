@@ -31,7 +31,7 @@ install () {
     apt-get -q -y install $pkgs
 
     # install maru package (this will always return failed exit status)
-    dpkg -i maru_* || true
+    apt install -y ./maru*
 
     # install all missing packages in "Depends"
     apt-get -q -y install -f
@@ -48,18 +48,13 @@ install_minimal () {
 
     # install all missing packages in "Depends"
     apt-get -q -y install --no-install-recommends -f
-
-    # HACK for now to skip libreoffice launcher icons
-    mv /home/maru/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel-minimal.xml \
-        /home/maru/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
-    chown -R maru:maru /home/maru/.config
 }
 
 add_maru_key () {
     apt-get clean
     apt-get -q update
     apt-get -q -y install curl gnupg
-    curl -fsSL https://maruos.com/static/gpg.txt | apt-key add -
+    curl -fsSL https://lindroid.org/gpg.txt | apt-key add -
 }
 
 shrink_rootfs () {
@@ -89,10 +84,16 @@ done
 
 echo "[*] Running $(basename "$0")..."
 
-recommends_min="xfce4-terminal
-vim-tiny
+recommends_min="
 firefox-esr
-ristretto"
+kde-full
+kwin-wayland
+sddm-theme-debian-breeze
+lindroid-quirks
+libhybris
+libhybris-test
+maliit-keyboard
+nano"
 
 if workaround_909498 ; then
     echo "[!] Installing firefox-esr from oldstable to work around Debian bug #909498"
@@ -105,14 +106,15 @@ fi
 recommends="$recommends_min
 libreoffice-writer
 libreoffice-calc
-libreoffice-impress"
+libreoffice-impress
+"
 
 echo "[*] Installing packages..."
 
 # add maru apt repository for installing dependencies
 add_maru_key
-cat > /etc/apt/sources.list.d/maruos.list <<EOF
-deb http://packages.maruos.com/debian testing/
+cat > /etc/apt/sources.list.d/lindroid.list <<EOF
+deb https://repo.lindroid.org/repository/lindroid trixie main
 EOF
 
 apt-get -q update
@@ -123,13 +125,13 @@ else
     install "$recommends"
 fi
 
+# Need to install after kde as it conflicts with some packages of the group
+apt install -qy libqt5quick5-gles qtbase5-gles-dev
+
 if workaround_909498 ; then
     # prevent `apt-get upgrade` from auto-upgrading firefox-esr
     apt-mark hold firefox-esr
 fi
-
-# delete maru apt repository for now (upgrades not tested)
-rm /etc/apt/sources.list.d/maruos.list
 
 # get rid of xscreensaver and annoying warning
 apt-get -y purge xscreensaver xscreensaver-data
